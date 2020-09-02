@@ -28,7 +28,7 @@ export function renderPath(path) {
   const link = (href, content) => `<a href="${href}">${content}</a>`
   const breadcrumb = []
   pathItems.forEach((item, idx) => {
-    breadcrumb.push(link(getPathLink(pathItems, idx), idx === 0 ? '🚩 Home' : decodeURIComponent(item)))
+    breadcrumb.push(link(getPathLink(pathItems, idx), idx === 0 ? '🏡 Home' : decodeURIComponent(item)))
   })
 
   return breadcrumb.join(' / ')

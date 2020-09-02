@@ -1,7 +1,7 @@
-name = "beet"
+name = "onedrive-cf"
 type = "webpack"
 workers_dev = true
-account_id = "a1e44a02bc09902ebeafca00dc98996f"
+account_id = "80c7276b7f7b52cbc6d2056ad8a84b4c"
 
 [env.staging]
 name = "drive-staging"

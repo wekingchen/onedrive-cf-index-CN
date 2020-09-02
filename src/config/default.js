@@ -12,7 +12,7 @@ const config = {
   /**
    * The base path for indexing, all files and subfolders are public by this tool. For example: `/Public`.
    */
-  base: '/public/小学英语',
+  base: '/English',
 
   /**
    * The url for your Firebase Realtime Database storage, we'll cache your refresh_token / access_token here.

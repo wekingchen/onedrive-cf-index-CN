@@ -5,19 +5,19 @@ const config = {
    * to get following params: client_id, client_secret, refresh_token & redirect_uri.
    */
   refresh_token: REFRESH_TOKEN,
-  client_id: 'cf8ad9b6-627a-45aa-9ec3-f551dc8ef29a',
+  client_id: '24528a95-c663-4c5f-b785-b95b08c87540',
   client_secret: CLIENT_SECRET,
   redirect_uri: 'http://localhost/od-cf',
 
   /**
    * The base path for indexing, all files and subfolders are public by this tool. For example: `/Public`.
    */
-  base: '/share',
+  base: '/public',
 
   /**
    * The url for your Firebase Realtime Database storage, we'll cache your refresh_token / access_token here.
    */
-  firebase_url: 'https://cf-index.firebaseio.com/auth.json',
+  firebase_url: 'https://onedrive-cf-index-8f1cd.firebaseio.com/auth.json',
 
   /**
    * Feature: add OneDriveCN (21Vianet) support

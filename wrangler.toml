@@ -2,6 +2,7 @@ name = "onedrive-cf"
 type = "webpack"
 workers_dev = true
 account_id = "80c7276b7f7b52cbc6d2056ad8a84b4c"
+zone_id = "e023878690ea0ac08823522d4c766244"
 
 [env.staging]
 name = "drive-staging"

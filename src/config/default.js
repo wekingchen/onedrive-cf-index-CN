@@ -17,7 +17,7 @@ const config = {
   /**
    * The url for your Firebase Realtime Database storage, we'll cache your refresh_token / access_token here.
    */
-  firebase_url: 'https://onedrive-cf-index-8f1cd.firebaseio.com/auth.json',
+  firebase_url: 'https://cf-index.firebaseio.com/auth.json',
 
   /**
    * Feature: add OneDriveCN (21Vianet) support
@@ -46,7 +46,7 @@ const config = {
     enable: false,
     entireFileCacheLimit: 10000000, // 10MB
     chunkedCacheLimit: 100000000, // 100MB
-    paths: ['/Images']
+    paths: ['/Images'],
   },
 
   /**
@@ -64,7 +64,7 @@ const config = {
    */
   upload: {
     enable: false,
-    key: 'your_secret_key_here'
+    key: '',
   },
 
   /**
@@ -73,7 +73,7 @@ const config = {
    * Example: https://storage.spencerwoo.com/🥟%20Some%20test%20files/Previews/eb37c02438f.png?raw=true&proxied
    * You can also embed this link (url encoded) directly inside Markdown or HTML.
    */
-  proxyDownload: true
+  proxyDownload: true,
 }
 
 export default config

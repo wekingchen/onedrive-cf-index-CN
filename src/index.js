@@ -72,11 +72,18 @@ async function handleRequest(request) {
 
   const isRequestFolder = pathname.endsWith('/')
 
-  // using different api to handle file or folder
-  let url = isRequestFolder
-    ? `https://${oneDriveApiEndpoint}/v1.0/me/drive/root${wrapPathName(pathname.replace(/\/$/, ''))}:/children`
-    : `https://${oneDriveApiEndpoint}/v1.0/me/drive/root${wrapPathName(pathname)}`
+  const isPaging = await request.text()
+  const paginationLink = isPaging ? JSON.parse(isPaging).pLink.active : undefined
 
+  // using different api to handle file or folder
+  let [
+    url = isRequestFolder
+      ? `https://${oneDriveApiEndpoint}/v1.0/me/drive/root${wrapPathName(pathname.replace(/\/$/, ''))}:/children` +
+        (config.pagination.enable && config.pagination.top ? `?$top=${config.pagination.top}` : ``)
+      : `https://${oneDriveApiEndpoint}/v1.0/me/drive/root${wrapPathName(pathname)}`
+  ] = [paginationLink]
+
+  console.log(url)
   const resp = await fetch(url, {
     headers: {
       Authorization: `bearer ${accessToken}`
@@ -86,19 +93,13 @@ async function handleRequest(request) {
   let error = null
   if (resp.ok) {
     let data = await resp.json()
-
-    // collecting clildren to Array —— `data.clildren`
-    url = data['@odata.nextLink'] || null
-    while (url) {
-      const nextData = await (
-        await fetch(url, {
-          headers: {
-            Authorization: `bearer ${accessToken}`
-          }
-        })
-      ).json()
-      url.includes('skiptoken') && data.value.push(...nextData.value)
-      url = nextData['@odata.nextLink']
+    console.log('data:', data)
+    if (data['@odata.nextLink']) {
+      request.paginationLink = {
+        previous: url,
+        next: data['@odata.nextLink'],
+        active: undefined
+      }
     }
 
     if ('file' in data) {
@@ -141,7 +142,7 @@ async function handleRequest(request) {
         return Response.redirect(request.url + '/', 302)
       }
 
-      return new Response(await renderFolderView(data.value, pathname), {
+      return new Response(await renderFolderView(data.value, pathname, request), {
         headers: {
           'Access-Control-Allow-Origin': '*',
           'content-type': 'text/html'

@@ -12,7 +12,7 @@ function getPathLink(pathItems, idx) {
   }
 
   pathList[0] = ''
-  return pathList.join('/')
+  return pathList.join('/') + '/'
 }
 
 /**
@@ -21,6 +21,7 @@ function getPathLink(pathItems, idx) {
  * @param {string} path current working directory, for instance: /🥑 Course PPT for CS (BIT)/2018 - 大三上 - 操作系统/
  */
 export function renderPath(path) {
+  console.log(path)
   const pathItems = path.split('/')
   pathItems[0] = '/'
   pathItems.pop()
@@ -28,7 +29,7 @@ export function renderPath(path) {
   const link = (href, content) => `<a href="${href}">${content}</a>`
   const breadcrumb = []
   pathItems.forEach((item, idx) => {
-    breadcrumb.push(link(getPathLink(pathItems, idx), idx === 0 ? '🏡 Home' : decodeURIComponent(item)))
+    breadcrumb.push(link(getPathLink(pathItems, idx), idx === 0 ? '🚩 Home' : decodeURIComponent(item)))
   })
 
   return breadcrumb.join(' / ')

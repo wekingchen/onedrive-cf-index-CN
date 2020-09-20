@@ -49,6 +49,7 @@ async function handleRequest(request) {
   const accessToken = await getAccessToken()
 
   const { pathname, searchParams } = new URL(request.url)
+  const neopathname = pathname.replace(/pagination$/, '')
 
   const rawImage = searchParams.get('raw')
   const thumbnail = config.thumbnail ? searchParams.get('thumbnail') : false
@@ -58,32 +59,30 @@ async function handleRequest(request) {
 
   if (thumbnail) {
     const url = `https://${oneDriveApiEndpoint}/v1.0/me/drive/root:${base +
-      (pathname === '/' ? '' : pathname)}:/thumbnails/0/${thumbnail}/content`
+      (neopathname === '/' ? '' : neopathname)}:/thumbnails/0/${thumbnail}/content`
     const resp = await fetch(url, {
       headers: {
         Authorization: `bearer ${accessToken}`
       }
     })
 
-    return await handleFile(request, pathname, resp.url, {
+    return await handleFile(request, neopathname, resp.url, {
       proxied
     })
   }
 
-  const isRequestFolder = pathname.endsWith('/')
+  const isRequestFolder = neopathname.endsWith('/') || searchParams.get('page')
+  const childrenApi =
+    `https://${oneDriveApiEndpoint}/v1.0/me/drive/root${wrapPathName(neopathname.replace(/\/$/, ''))}:/children` +
+    (config.pagination.enable && config.pagination.top ? `?$top=${config.pagination.top}` : ``)
 
-  const isPaging = await request.text()
-  const paginationLink = isPaging ? JSON.parse(isPaging).pLink.active : undefined
+  // using different api to handle file or folder: children or driveItem
+  let url = isRequestFolder ? childrenApi : `https://${oneDriveApiEndpoint}/v1.0/me/drive/root${wrapPathName(pathname)}`
 
-  // using different api to handle file or folder
-  let [
-    url = isRequestFolder
-      ? `https://${oneDriveApiEndpoint}/v1.0/me/drive/root${wrapPathName(pathname.replace(/\/$/, ''))}:/children` +
-        (config.pagination.enable && config.pagination.top ? `?$top=${config.pagination.top}` : ``)
-      : `https://${oneDriveApiEndpoint}/v1.0/me/drive/root${wrapPathName(pathname)}`
-  ] = [paginationLink]
-
-  console.log(url)
+  // get & set {pLink ,pIdx} for fetching and paging
+  let paginationLink = request.headers.get('pLink')
+  const paginationIdx = request.headers.get('pIdx') - 0
+  if (paginationLink && paginationLink !== 'undefined') url = `${childrenApi}&$skiptoken=${paginationLink}`
   const resp = await fetch(url, {
     headers: {
       Authorization: `bearer ${accessToken}`
@@ -93,13 +92,11 @@ async function handleRequest(request) {
   let error = null
   if (resp.ok) {
     let data = await resp.json()
-    console.log('data:', data)
     if (data['@odata.nextLink']) {
-      request.paginationLink = {
-        previous: url,
-        next: data['@odata.nextLink'],
-        active: undefined
-      }
+      request.pIdx = paginationIdx ? paginationIdx : 1
+      request.pLink = data['@odata.nextLink'].match(/&\$skiptoken=(.+)/)[1]
+    } else {
+      if (paginationIdx) request.pIdx = -paginationIdx
     }
 
     if ('file' in data) {
@@ -111,13 +108,13 @@ async function handleRequest(request) {
 
       // Render image directly if ?raw=true parameters are given
       if (rawImage || !(fileExt in extensions)) {
-        return await handleFile(request, pathname, data['@microsoft.graph.downloadUrl'], {
+        return await handleFile(request, neopathname, data['@microsoft.graph.downloadUrl'], {
           proxied,
           fileSize: data.size
         })
       }
 
-      return new Response(await renderFilePreview(data, pathname, fileExt), {
+      return new Response(await renderFilePreview(data, neopathname, fileExt), {
         headers: {
           'Access-Control-Allow-Origin': '*',
           'content-type': 'text/html'
@@ -129,7 +126,7 @@ async function handleRequest(request) {
         const filename = searchParams.get('upload')
         const key = searchParams.get('key')
         if (filename && key && config.upload.key === key) {
-          return await handleUpload(request, pathname, filename)
+          return await handleUpload(request, neopathname, filename)
         } else {
           return new Response('', {
             status: 400
@@ -142,7 +139,7 @@ async function handleRequest(request) {
         return Response.redirect(request.url + '/', 302)
       }
 
-      return new Response(await renderFolderView(data.value, pathname, request), {
+      return new Response(await renderFolderView(data.value, neopathname, request), {
         headers: {
           'Access-Control-Allow-Origin': '*',
           'content-type': 'text/html'

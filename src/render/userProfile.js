@@ -12,7 +12,7 @@ export const userProfile = {
 
   // a simple footer
   footerContent: `<p>
-                      thanks: <a href="https://github.com/beetcb/onedrive-cf-index-CN">onedrive-cf-index-CN</a>
+                      thanks: <a href="https://github.com/spencerwooo/onedrive-cf-index">onedrive-cf-index</a>
                       , hosted on <a href="https://www.cloudflare.com/products/cloudflare-workers/">Cloudflare Workers</a>.
                   </p>`
 }

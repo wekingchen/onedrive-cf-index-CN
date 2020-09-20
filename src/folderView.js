@@ -100,11 +100,7 @@ export async function renderFolderView(items, path, request) {
         )
       ) +
       (readmeExists && !isIndex ? await renderMarkdown(readmeFetchUrl, 'fade-in-fwd', '') : '') +
-      (isIndex ? intro : '') +
-      (request.paginationLink
-        ? el('a', ['class="pagination" onclick="handlePagination(false)"'], 'Previous') +
-          el('a', ['class="pagination" onclick="handlePagination(true)"'], 'Next')
-        : '')
+      (isIndex ? intro : '')
   )
-  return renderHTML(body, JSON.stringify(request.paginationLink))
+  return renderHTML(body, ...[request.pLink, request.pIdx])
 }
